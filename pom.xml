@@ -30,7 +30,20 @@
                             <goal>shade</goal>
                         </goals>
                         <configuration>
-                            <createDependencyReducedPom>false</createDependencyReducedPom>
+                            <filters>
+                                <filter>
+                                    <artifact>*:*</artifact>
+                                    <!--
+                                        Some kotlin meta data makes it unreadable to IDE in other kotlin projects idk why
+                                         So i just yeet it
+                                     -->
+                                    <excludes>
+                                        <exclude>**/*.kotlin_metadata</exclude>
+                                        <exclude>**/*.kotlin_module</exclude>
+                                        <exclude>**/*.kotlin_builtins</exclude>
+                                    </excludes>
+                                </filter>
+                            </filters>
                         </configuration>
                     </execution>
                 </executions>
