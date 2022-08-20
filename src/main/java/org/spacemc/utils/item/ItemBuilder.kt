@@ -6,12 +6,15 @@ import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.Color
 import org.bukkit.Material
+import org.bukkit.NamespacedKey
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.LeatherArmorMeta
 import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.material.MaterialData
+import org.bukkit.persistence.PersistentDataContainer
+import org.bukkit.persistence.PersistentDataType
 import java.lang.reflect.Field
 import java.util.*
 
@@ -452,5 +455,40 @@ class ItemBuilder {
      */
     fun make(): ItemStack {
         return item
+    }
+
+    private val pdcTypeMap = mapOf<Class<*>, PersistentDataType<*,*>>(
+        Byte::class.java to PersistentDataType.BYTE,
+        Short::class.java to PersistentDataType.SHORT,
+        Int::class.java to PersistentDataType.INTEGER,
+        Long::class.java to PersistentDataType.LONG,
+        Float::class.java to PersistentDataType.FLOAT,
+        Double::class.java to PersistentDataType.DOUBLE,
+        String::class.java to PersistentDataType.STRING,
+        ByteArray::class.java to PersistentDataType.BYTE_ARRAY,
+        arrayOf<Int>().javaClass to PersistentDataType.INTEGER_ARRAY,
+        arrayOf<Long>().javaClass to PersistentDataType.LONG_ARRAY,
+        arrayOf<PersistentDataContainer>().javaClass to PersistentDataType.TAG_CONTAINER_ARRAY,
+        PersistentDataContainer::class.java to PersistentDataType.TAG_CONTAINER
+    )
+
+    fun <T> setPDCKeyValue(key: NamespacedKey, value: T) {
+        var pdcType: PersistentDataType<T,T>? = null
+        for (entry in pdcTypeMap) {
+            if(entry.key.isInstance(value))
+                pdcType = entry.value as PersistentDataType<T, T>
+        }
+        pdcType ?: throw Exception("value isn't one of the PersistentDataTypes available")
+
+        val meta = meta()
+        val pdc = meta.persistentDataContainer
+        pdc.set(key, pdcType, value)
+        this.item.itemMeta = meta
+    }
+
+    fun <T> getPDCKeyValue(key: NamespacedKey, pdt: PersistentDataType<T,T>): T? {
+        val meta = meta()
+        val pdc = meta.persistentDataContainer
+        return pdc.get(key, pdt)
     }
 }
