@@ -1,7 +1,9 @@
 package org.spacemc.utils.item
 
 
+import com.destroystokyo.paper.profile.ProfileProperty
 import net.kyori.adventure.text.Component
+import org.bukkit.Bukkit
 import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.enchantments.Enchantment
@@ -10,6 +12,7 @@ import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.LeatherArmorMeta
 import org.bukkit.inventory.meta.SkullMeta
 import org.bukkit.material.MaterialData
+import java.lang.reflect.Field
 import java.util.*
 
 
@@ -385,6 +388,51 @@ class ItemBuilder {
             skullMeta.owner = name
             make().setItemMeta(meta())
         }
+        return this
+    }
+
+    /**
+     * Sets the custom texture of [Material.LEGACY_SKULL_ITEM] of type [ItemStack]
+     *
+     * To get a texture you must visit site https://minecraft-heads.com
+     * And click on your custom head then scroll down
+     * And get a code named "Minecraft-URL"
+     *
+     * @param texture
+     * the [String] value to set the custom texture meta for the SKULL_ITEM Material type ItemStack.
+     *
+     * @return the current instance for chainable application
+     * @since 1.0
+     */
+    fun customTexture(texture: String): ItemBuilder {
+        var texture = texture
+        texture = "http://textures.minecraft.net/texture/$texture"
+        if (texture.isEmpty()) {
+            return this
+        }
+        val skullMeta: SkullMeta = this.meta() as SkullMeta
+        val profile = Bukkit.createProfile(UUID.randomUUID(), null)
+        val encodedData: ByteArray =
+            Base64.getEncoder().encode(String.format("{textures:{SKIN:{url:\"%s\"}}}", texture).toByteArray())
+        profile.properties.add(ProfileProperty("textures", String(encodedData)))
+        var profileField: Field? = null
+        try {
+            profileField = skullMeta.javaClass.getDeclaredField("profile")
+        } catch (e: NoSuchFieldException) {
+            e.printStackTrace()
+        } catch (e: SecurityException) {
+            e.printStackTrace()
+        }
+        assert(profileField != null)
+        profileField!!.isAccessible = true
+        try {
+            profileField[skullMeta] = profile
+        } catch (e: IllegalArgumentException) {
+            e.printStackTrace()
+        } catch (e: IllegalAccessException) {
+            e.printStackTrace()
+        }
+        make().setItemMeta(skullMeta)
         return this
     }
 
