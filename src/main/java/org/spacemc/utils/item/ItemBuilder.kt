@@ -17,6 +17,7 @@ import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataType
 import java.lang.reflect.Field
 import java.util.*
+import kotlin.reflect.KClass
 
 
 /**
@@ -457,19 +458,19 @@ class ItemBuilder {
         return item
     }
 
-    private val pdcTypeMap = mapOf<Class<*>, PersistentDataType<*,*>>(
-        Byte::class.java to PersistentDataType.BYTE,
-        Short::class.java to PersistentDataType.SHORT,
-        Int::class.java to PersistentDataType.INTEGER,
-        Long::class.java to PersistentDataType.LONG,
-        Float::class.java to PersistentDataType.FLOAT,
-        Double::class.java to PersistentDataType.DOUBLE,
-        String::class.java to PersistentDataType.STRING,
-        ByteArray::class.java to PersistentDataType.BYTE_ARRAY,
-        arrayOf<Int>().javaClass to PersistentDataType.INTEGER_ARRAY,
-        arrayOf<Long>().javaClass to PersistentDataType.LONG_ARRAY,
-        arrayOf<PersistentDataContainer>().javaClass to PersistentDataType.TAG_CONTAINER_ARRAY,
-        PersistentDataContainer::class.java to PersistentDataType.TAG_CONTAINER
+    private val pdcTypeMap = mapOf<KClass<*>, PersistentDataType<*,*>>(
+        Byte::class to PersistentDataType.BYTE,
+        Short::class to PersistentDataType.SHORT,
+        Int::class to PersistentDataType.INTEGER,
+        Long::class to PersistentDataType.LONG,
+        Float::class to PersistentDataType.FLOAT,
+        Double::class to PersistentDataType.DOUBLE,
+        String::class to PersistentDataType.STRING,
+        ByteArray::class to PersistentDataType.BYTE_ARRAY,
+        arrayOf<Int>()::class to PersistentDataType.INTEGER_ARRAY,
+        arrayOf<Long>()::class to PersistentDataType.LONG_ARRAY,
+        arrayOf<PersistentDataContainer>()::class to PersistentDataType.TAG_CONTAINER_ARRAY,
+        PersistentDataContainer::class to PersistentDataType.TAG_CONTAINER
     )
 
     fun <T> setPDCKeyValue(key: NamespacedKey, value: T) {
