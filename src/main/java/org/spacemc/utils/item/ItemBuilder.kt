@@ -1,12 +1,13 @@
 package org.spacemc.utils.item
 
-
+import com.destroystokyo.paper.profile.PlayerProfile
 import com.destroystokyo.paper.profile.ProfileProperty
 import net.kyori.adventure.text.Component
 import org.bukkit.Bukkit
 import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
+import org.bukkit.block.Skull
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
@@ -18,7 +19,6 @@ import org.bukkit.persistence.PersistentDataType
 import java.lang.reflect.Field
 import java.util.*
 import kotlin.reflect.KClass
-
 
 /**
  * NOTICE: This utility was developer as part of AeolusLib. While you can use it for your own projects, You are NOT allowed to delete or move this header comment.
@@ -177,8 +177,7 @@ class ItemBuilder {
         var loresList = meta().lore()
         if (loresList == null) {
             loresList = arrayListOf()
-        }
-        else {
+        } else {
             loresList.clear()
         }
 
@@ -394,49 +393,40 @@ class ItemBuilder {
         }
         return this
     }
-
     /**
-     * Sets the custom texture of [Material.LEGACY_SKULL_ITEM] of type [ItemStack]
+     * Sets the custom texture of [Material.PLAYER_HEAD] of type [ItemStack]
      *
      * To get a texture you must visit site https://minecraft-heads.com
      * And click on your custom head then scroll down
      * And get a code named "Minecraft-URL"
      *
-     * @param texture
-     * the [String] value to set the custom texture meta for the SKULL_ITEM Material type ItemStack.
+     * @param minecraftSkinUrl
+     * the [String] value to set the custom texture meta for the PLAYER_HEAD Material type ItemStack.
      *
      * @return the current instance for chainable application
      * @since 1.0
      */
-    fun customTexture(texture: String): ItemBuilder {
-        var texture = texture
+    fun customTexture(minecraftSkinUrl: String?): ItemBuilder {
+        if (this.item.type != Material.PLAYER_HEAD) throw UnsupportedOperationException("You need to set player head for this function to work")
+
+        val meta: SkullMeta = this.meta() as SkullMeta
+
+        var texture = minecraftSkinUrl
         texture = "http://textures.minecraft.net/texture/$texture"
         if (texture.isEmpty()) {
             return this
         }
-        val skullMeta: SkullMeta = this.meta() as SkullMeta
-        val profile = Bukkit.createProfile(UUID.randomUUID(), null)
         val encodedData: ByteArray =
             Base64.getEncoder().encode(String.format("{textures:{SKIN:{url:\"%s\"}}}", texture).toByteArray())
+
+        val profile: PlayerProfile = Bukkit.createProfileExact(UUID.randomUUID(), "Skull")
+
         profile.properties.add(ProfileProperty("textures", String(encodedData)))
-        var profileField: Field? = null
-        try {
-            profileField = skullMeta.javaClass.getDeclaredField("profile")
-        } catch (e: NoSuchFieldException) {
-            e.printStackTrace()
-        } catch (e: SecurityException) {
-            e.printStackTrace()
-        }
-        assert(profileField != null)
-        profileField!!.isAccessible = true
-        try {
-            profileField[skullMeta] = profile
-        } catch (e: IllegalArgumentException) {
-            e.printStackTrace()
-        } catch (e: IllegalAccessException) {
-            e.printStackTrace()
-        }
-        make().setItemMeta(skullMeta)
+        profile.setProperty(ProfileProperty("textures", texture, texture))
+
+        meta.playerProfile = profile
+        this.item.itemMeta = meta
+
         return this
     }
 
@@ -458,7 +448,7 @@ class ItemBuilder {
         return item
     }
 
-    private val pdcTypeMap = mapOf<KClass<*>, PersistentDataType<*,*>>(
+    private val pdcTypeMap = mapOf<KClass<*>, PersistentDataType<*, *>>(
         Byte::class to PersistentDataType.BYTE,
         Short::class to PersistentDataType.SHORT,
         Int::class to PersistentDataType.INTEGER,
@@ -474,10 +464,11 @@ class ItemBuilder {
     )
 
     fun <T> setPDCKeyValue(key: NamespacedKey, value: T) {
-        var pdcType: PersistentDataType<T,T>? = null
+        var pdcType: PersistentDataType<T, T>? = null
         for (entry in pdcTypeMap) {
-            if(entry.key.isInstance(value))
+            if (entry.key.isInstance(value)) {
                 pdcType = entry.value as PersistentDataType<T, T>
+            }
         }
         pdcType ?: throw Exception("value isn't one of the PersistentDataTypes available")
 
@@ -487,7 +478,7 @@ class ItemBuilder {
         this.item.itemMeta = meta
     }
 
-    fun <T> getPDCKeyValue(key: NamespacedKey, pdt: PersistentDataType<T,T>): T? {
+    fun <T> getPDCKeyValue(key: NamespacedKey, pdt: PersistentDataType<T, T>): T? {
         val meta = meta()
         val pdc = meta.persistentDataContainer
         return pdc.get(key, pdt)
