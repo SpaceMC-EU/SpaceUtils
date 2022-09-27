@@ -7,7 +7,6 @@ import org.bukkit.Bukkit
 import org.bukkit.Color
 import org.bukkit.Material
 import org.bukkit.NamespacedKey
-import org.bukkit.block.Skull
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemStack
 import org.bukkit.inventory.meta.ItemMeta
@@ -163,11 +162,9 @@ class ItemBuilder {
      */
     fun lores(lores: Array<String>): ItemBuilder {
         var loresList = meta().lore
-        if (loresList == null) {
-            loresList = ArrayList()
-        } else {
-            loresList.clear()
-        }
+
+        if (loresList == null) loresList = mutableListOf()
+
         Collections.addAll(loresList, *lores)
         meta().lore = loresList
         return this
@@ -175,16 +172,11 @@ class ItemBuilder {
 
     fun lores(lores: Array<Component>): ItemBuilder {
         var loresList = meta().lore()
-        if (loresList == null) {
-            loresList = arrayListOf()
-        } else {
-            loresList.clear()
-        }
+        if (loresList == null) loresList = arrayListOf()
 
         Collections.addAll(loresList, *lores)
 
         meta().lore(loresList)
-        make().itemMeta = meta()
         return this
     }
 
@@ -393,6 +385,7 @@ class ItemBuilder {
         }
         return this
     }
+
     /**
      * Sets the custom texture of [Material.PLAYER_HEAD] of type [ItemStack]
      *
@@ -421,13 +414,12 @@ class ItemBuilder {
 
         val profile: PlayerProfile = Bukkit.createProfileExact(UUID.randomUUID(), "Skull")
         profile.properties.add(ProfileProperty("textures", String(encodedData)))
-        var profileField: Field? = null;
+        var profileField: Field? = null
         try {
-            profileField = meta.javaClass.getDeclaredField("profile");
-            profileField.isAccessible = true;
-            profileField.set(meta, profile);
-        }
-        catch (e: Exception) {
+            profileField = meta.javaClass.getDeclaredField("profile")
+            profileField.isAccessible = true
+            profileField.set(meta, profile)
+        } catch (e: Exception) {
             e.printStackTrace()
         }
 
@@ -484,6 +476,7 @@ class ItemBuilder {
      * @return the ItemStack of the ItemBuilder instance.
      */
     fun make(): ItemStack {
+        item.itemMeta = itemM
         return item
     }
 
