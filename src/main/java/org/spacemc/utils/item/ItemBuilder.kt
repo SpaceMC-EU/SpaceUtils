@@ -414,50 +414,10 @@ class ItemBuilder {
 
         val profile: PlayerProfile = Bukkit.createProfileExact(UUID.randomUUID(), "Skull")
         profile.properties.add(ProfileProperty("textures", String(encodedData)))
-        var profileField: Field? = null
-        try {
-            profileField = meta.javaClass.getDeclaredField("profile")
-            profileField.isAccessible = true
-            profileField.set(meta, profile)
-        } catch (e: Exception) {
-            e.printStackTrace()
-        }
 
         meta.playerProfile = profile
         this.item.itemMeta = meta
 
-        return this
-    }
-
-    fun customTexture(texture: String): ItemBuilder {
-        var texture = texture
-        texture = "http://textures.minecraft.net/texture/$texture"
-        if (texture.isEmpty()) {
-            return this
-        }
-        val skullMeta: SkullMeta = this.meta() as SkullMeta
-        val profile = Bukkit.createProfile(UUID.randomUUID(), null)
-        val encodedData: ByteArray =
-            Base64.getEncoder().encode(String.format("{textures:{SKIN:{url:\"%s\"}}}", texture).toByteArray())
-        profile.properties.add(ProfileProperty("textures", String(encodedData)))
-        var profileField: Field? = null
-        try {
-            profileField = skullMeta.javaClass.getDeclaredField("profile")
-        } catch (e: NoSuchFieldException) {
-            e.printStackTrace()
-        } catch (e: SecurityException) {
-            e.printStackTrace()
-        }
-        assert(profileField != null)
-        profileField!!.isAccessible = true
-        try {
-            profileField[skullMeta] = profile
-        } catch (e: IllegalArgumentException) {
-            e.printStackTrace()
-        } catch (e: IllegalAccessException) {
-            e.printStackTrace()
-        }
-        make().setItemMeta(skullMeta)
         return this
     }
 
