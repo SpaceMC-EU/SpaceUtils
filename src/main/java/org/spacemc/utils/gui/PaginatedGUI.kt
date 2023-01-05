@@ -55,16 +55,18 @@ abstract class PaginatedGUI {
 
         val forwardPane = StaticPane(6, 4, 3, 2)
         forwardPane.fillWith(forwardItem) {
-            if(paginatedPane.pages-1 > paginatedPane.page)
+            if(paginatedPane.pages-1 > paginatedPane.page) {
                 paginatedPane.page++
-            gui.update()
+                gui.update()
+            }
         }
 
         val backPane = StaticPane(0, 4, 3, 2)
         backPane.fillWith(backItem) {
-            if(paginatedPane.pages-1 > paginatedPane.page)
+            if(paginatedPane.page > 0) {
                 paginatedPane.page--
-            gui.update()
+                gui.update()
+            }
         }
 
         val closePane = StaticPane(3, 4, 3, 2)
