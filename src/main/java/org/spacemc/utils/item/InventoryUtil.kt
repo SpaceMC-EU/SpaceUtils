@@ -29,7 +29,10 @@ object InventoryUtil {
     fun addItemToPlayer(player: Player, item: ItemStack?) {
         val inventory = player.inventory
         val firstEmpty = inventory.firstEmpty()
-        if (firstEmpty == -1) dropItemAtPlayer(player, item)
+        if (firstEmpty == -1) {
+            dropItemAtPlayer(player, item)
+            return
+        }
         inventory.addItem(item!!)
     }
 
