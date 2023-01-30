@@ -148,7 +148,7 @@
         <dependency>
             <groupId>org.ktorm</groupId>
             <artifactId>ktorm-support-mysql</artifactId>
-            <version>3.5.0</version>
+            <version>3.6.0</version>
         </dependency>
         <dependency>
             <groupId>org.ktorm</groupId>
