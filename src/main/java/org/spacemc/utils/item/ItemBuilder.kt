@@ -3,6 +3,7 @@ package org.spacemc.utils.item
 import com.destroystokyo.paper.profile.PlayerProfile
 import com.destroystokyo.paper.profile.ProfileProperty
 import net.kyori.adventure.text.Component
+import net.kyori.adventure.text.format.TextDecoration
 import org.bukkit.Bukkit
 import org.bukkit.Color
 import org.bukkit.Material
@@ -121,6 +122,11 @@ class ItemBuilder {
         return this
     }
 
+    fun unitalizedName(name: Component): ItemBuilder {
+        val unitalizedName = name.decoration(TextDecoration.ITALIC, false)
+        return name(unitalizedName)
+    }
+
     /**
      * Adds a line of lore to the [ItemStack]
      *
@@ -140,6 +146,7 @@ class ItemBuilder {
         make().itemMeta = meta()
         return this
     }
+
     fun lore(lore: Component): ItemBuilder {
         var lores = meta().lore()
         if (lores == null) {
@@ -178,6 +185,13 @@ class ItemBuilder {
 
         meta().lore(loresList)
         return this
+    }
+
+    fun unitalizedLores(lores: Array<Component>): ItemBuilder {
+        val unitalizedLores = lores.map {
+            it.decoration(TextDecoration.ITALIC, false)
+        }.toTypedArray()
+        return lores(unitalizedLores)
     }
 
     /**
@@ -221,7 +235,7 @@ class ItemBuilder {
      * @since 1.0
      */
     fun enchantment(enchantment: Enchantment, level: Int): ItemBuilder {
-        make().addUnsafeEnchantment(enchantment!!, level)
+        make().addUnsafeEnchantment(enchantment, level)
         return this
     }
 
@@ -235,7 +249,7 @@ class ItemBuilder {
      * @since 1.0
      */
     fun enchantment(enchantment: Enchantment): ItemBuilder {
-        make().addUnsafeEnchantment(enchantment!!, 1)
+        make().addUnsafeEnchantment(enchantment, 1)
         return this
     }
 
