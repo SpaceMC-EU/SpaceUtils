@@ -501,7 +501,7 @@ class ItemBuilder {
         PersistentDataContainer::class to PersistentDataType.TAG_CONTAINER
     )
 
-    fun <T> setPDCKeyValue(key: NamespacedKey, value: T) {
+    fun <T : Any> setPDCKeyValue(key: NamespacedKey, value: T) {
         var pdcType: PersistentDataType<T, T>? = null
         for (entry in pdcTypeMap) {
             if (entry.key.isInstance(value)) {
