@@ -20,4 +20,9 @@ object NumberFormatter {
             DecimalFormat("#,##0").format(numValue)
         }
     }
+
+    fun roundTextToDecimalPlaces(inputText: String, decimalPlaces: Int = 2): String {
+        val inputValue = inputText.toDouble()
+        return "%.${decimalPlaces}f".format(inputValue)
+    }
 }
