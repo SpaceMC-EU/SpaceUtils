@@ -1,10 +1,11 @@
-package org.spacemc.utils.location
+package org.spacemc.spaceutils.location
 
 import org.bukkit.Location
 import kotlin.math.cos
 import kotlin.math.pow
 import kotlin.math.sin
 
+@Suppress("unused")
 fun Location.circle2D(radius: Double, precision: Int = 16): List<Location> {
     val prec = precision.coerceAtLeast(4)
 
@@ -22,6 +23,7 @@ fun Location.circle2D(radius: Double, precision: Int = 16): List<Location> {
     return positions
 }
 
+@Suppress("unused")
 fun Location.interpolate2D(other: Location, precision: Double = 1.0): List<Location> {
     val positions = mutableListOf<Location>()
 

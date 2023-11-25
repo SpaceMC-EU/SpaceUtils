@@ -1,22 +1,21 @@
-package org.spacemc.utils.item
+package org.spacemc.spaceutils.item
 
 import org.bukkit.entity.Player
 import org.bukkit.inventory.ItemStack
 
+@Suppress("unused")
 object InventoryUtil {
-    fun removeItemsFromInv(player: Player, item: ItemStack, amount: Int):Boolean {
+    fun removeItemsFromInv(player: Player, item: ItemStack, amount: Int): Boolean {
         val inv = player.inventory
         if (!inv.containsAtLeast(item, amount)) {
             return false
         }
 
-        val item2remove = ItemBuilder(item.clone())
+        val itemForRemoval = ItemBuilder(item.clone())
             .amount(amount)
             .make()
 
-        inv.removeItem(
-            item2remove
-        )
+        inv.removeItem(itemForRemoval)
         return true
     }
 
@@ -26,6 +25,7 @@ object InventoryUtil {
         }
     }
 
+    @Suppress("MemberVisibilityCanBePrivate")
     fun addItemToPlayer(player: Player, item: ItemStack?) {
         val inventory = player.inventory
         val firstEmpty = inventory.firstEmpty()
@@ -36,6 +36,7 @@ object InventoryUtil {
         inventory.addItem(item!!)
     }
 
+    @Suppress("MemberVisibilityCanBePrivate")
     fun dropItemAtPlayer(player: Player, item: ItemStack?) {
         val location = player.location.add(0.0, 1.0, 0.0)
         val world = location.world

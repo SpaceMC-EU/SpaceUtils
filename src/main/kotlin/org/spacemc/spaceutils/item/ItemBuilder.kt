@@ -1,4 +1,4 @@
-package org.spacemc.utils.item
+package org.spacemc.spaceutils.item
 
 import com.destroystokyo.paper.profile.PlayerProfile
 import com.destroystokyo.paper.profile.ProfileProperty
@@ -10,10 +10,10 @@ import org.bukkit.Material
 import org.bukkit.NamespacedKey
 import org.bukkit.enchantments.Enchantment
 import org.bukkit.inventory.ItemStack
+import org.bukkit.inventory.meta.Damageable
 import org.bukkit.inventory.meta.ItemMeta
 import org.bukkit.inventory.meta.LeatherArmorMeta
 import org.bukkit.inventory.meta.SkullMeta
-import org.bukkit.material.MaterialData
 import org.bukkit.persistence.PersistentDataContainer
 import org.bukkit.persistence.PersistentDataType
 import java.lang.reflect.Field
@@ -33,9 +33,10 @@ import kotlin.reflect.KClass
  * @author MCAeolus
  * @version 1.0
  */
+@Suppress("unused")
 class ItemBuilder {
     private val item: ItemStack
-    private val itemM: ItemMeta
+    private val itemMeta: ItemMeta
 
     /**
      * Init item chainable via given Material parameter.
@@ -47,7 +48,7 @@ class ItemBuilder {
      */
     constructor(itemType: Material) {
         item = ItemStack(itemType)
-        itemM = item.itemMeta
+        itemMeta = item.itemMeta
     }
 
     /**
@@ -60,7 +61,7 @@ class ItemBuilder {
      */
     constructor(itemStack: ItemStack) {
         item = itemStack
-        itemM = item.itemMeta
+        itemMeta = item.itemMeta
     }
 
     /**
@@ -70,7 +71,7 @@ class ItemBuilder {
      */
     constructor() {
         item = ItemStack(Material.AIR)
-        itemM = item.itemMeta
+        itemMeta = item.itemMeta
     }
 
     /**
@@ -111,7 +112,7 @@ class ItemBuilder {
      * @since 1.0
      */
     fun name(name: String): ItemBuilder {
-        meta().setDisplayName(name)
+        meta().displayName(Component.text(name))
         make().itemMeta = meta()
         return this
     }
@@ -137,14 +138,7 @@ class ItemBuilder {
      * @since 1.0
      */
     fun lore(lore: String): ItemBuilder {
-        var lores = meta().lore
-        if (lores == null) {
-            lores = ArrayList()
-        }
-        lores.add(lore)
-        meta().lore = lores
-        make().itemMeta = meta()
-        return this
+        return lore(Component.text(lore))
     }
 
     fun lore(lore: Component): ItemBuilder {
@@ -168,15 +162,10 @@ class ItemBuilder {
      * @since 1.0
      */
     fun lores(lores: Array<String>): ItemBuilder {
-        var loresList = meta().lore
-
-        if (loresList == null) loresList = mutableListOf()
-
-        Collections.addAll(loresList, *lores)
-        meta().lore = loresList
-        return this
+        return lores(lores.map { Component.text(it) }.toTypedArray())
     }
 
+    @Suppress("MemberVisibilityCanBePrivate")
     fun lores(lores: Array<Component>): ItemBuilder {
         var loresList = meta().lore()
         if (loresList == null) loresList = arrayListOf()
@@ -196,6 +185,7 @@ class ItemBuilder {
 
     /**
      * Changes the durability of the current [ItemStack]
+     * Durability - number of uses left for the tool
      *
      * @param durability
      * the new int amount to set the ItemStack's durability to.
@@ -204,21 +194,8 @@ class ItemBuilder {
      * @since 1.0
      */
     fun durability(durability: Int): ItemBuilder {
-        make().durability = durability.toShort()
-        return this
-    }
-
-    /**
-     * Changes the data value of the [ItemStack]
-     *
-     * @param data
-     * the new int data value (parsed as byte) to set the ItemStack's durability to.
-     *
-     * @return the current instance for chainable application.
-     * @since 1.0
-     */
-    fun data(data: Int): ItemBuilder {
-        make().data = MaterialData(make().type, data.toByte())
+        val item = make()
+        (item as Damageable).damage = item.type.maxDurability - durability
         return this
     }
 
@@ -330,8 +307,9 @@ class ItemBuilder {
      * @since 1.0
      */
     fun clearLore(lore: String): ItemBuilder {
-        if (meta().lore!!.contains(lore)) {
-            meta().lore!!.remove(lore)
+        val componentLore = Component.text(lore)
+        if (meta().lore()!!.contains(componentLore)) {
+            meta().lore()!!.remove(componentLore)
         }
         make().itemMeta = meta()
         return this
@@ -344,7 +322,7 @@ class ItemBuilder {
      * @since 1.0
      */
     fun clearLores(): ItemBuilder {
-        meta().lore!!.clear()
+        meta().lore()!!.clear()
         make().itemMeta = meta()
         return this
     }
@@ -383,24 +361,6 @@ class ItemBuilder {
     }
 
     /**
-     * Sets the skullOwner [SkullMeta] of the current SKULL_ITEM [Material] type [ItemStack]
-     *
-     * @param name
-     * the [String] value to set the SkullOwner meta to for the SKULL_ITEM Material type ItemStack.
-     *
-     * @return the current instance for chainable application
-     * @since 1.0
-     */
-    fun skullOwner(name: String): ItemBuilder {
-        if (make().type == Material.PLAYER_HEAD && make().durability == 3.toByte().toShort()) {
-            val skullMeta = meta() as SkullMeta
-            skullMeta.owner = name
-            make().setItemMeta(meta())
-        }
-        return this
-    }
-
-    /**
      * Sets the custom texture of [Material.PLAYER_HEAD] of type [ItemStack]
      *
      * To get a texture you must visit site https://minecraft-heads.com
@@ -414,12 +374,13 @@ class ItemBuilder {
      * @since 1.0
      */
     fun playerHead(minecraftSkinUrl: String?): ItemBuilder {
-        if (this.item.type != Material.PLAYER_HEAD) throw UnsupportedOperationException("You need to set player head for this function to work")
+        if (this.item.type != Material.PLAYER_HEAD)
+            throw UnsupportedOperationException("You need to set player head for this function to work")
 
         val meta: SkullMeta = this.meta() as SkullMeta
 
         var texture = minecraftSkinUrl
-        texture = "http://textures.minecraft.net/texture/$texture"
+        texture = "https://textures.minecraft.net/texture/$texture"
         if (texture.isEmpty()) {
             return this
         }
@@ -435,9 +396,9 @@ class ItemBuilder {
         return this
     }
 
-    fun customTexture(texture: String): ItemBuilder {
-        var texture = texture
-        texture = "http://textures.minecraft.net/texture/$texture"
+    fun customTexture(textureId: String): ItemBuilder {
+        var texture = textureId
+        texture = "https://textures.minecraft.net/texture/$texture"
         if (texture.isEmpty()) {
             return this
         }
@@ -472,8 +433,9 @@ class ItemBuilder {
      *
      * @return the ItemMeta of the ItemStack.
      */
+    @Suppress("MemberVisibilityCanBePrivate")
     fun meta(): ItemMeta {
-        return itemM
+        return itemMeta
     }
 
     /**
@@ -482,7 +444,7 @@ class ItemBuilder {
      * @return the ItemStack of the ItemBuilder instance.
      */
     fun make(): ItemStack {
-        item.itemMeta = itemM
+        item.itemMeta = itemMeta
         return item
     }
 
@@ -501,14 +463,12 @@ class ItemBuilder {
         PersistentDataContainer::class to PersistentDataType.TAG_CONTAINER
     )
 
+    @Suppress("UNCHECKED_CAST")
     fun <T : Any> setPDCKeyValue(key: NamespacedKey, value: T) {
-        var pdcType: PersistentDataType<T, T>? = null
-        for (entry in pdcTypeMap) {
-            if (entry.key.isInstance(value)) {
-                pdcType = entry.value as PersistentDataType<T, T>
-            }
-        }
-        pdcType ?: throw Exception("value isn't one of the PersistentDataTypes available")
+        val pdcType = pdcTypeMap.entries
+            .firstOrNull { it.key.isInstance(value) }
+            ?.value as? PersistentDataType<T, T>
+            ?: throw Exception("No PersistentDataType found for type ${value::class.simpleName}")
 
         val meta = meta()
         val pdc = meta.persistentDataContainer

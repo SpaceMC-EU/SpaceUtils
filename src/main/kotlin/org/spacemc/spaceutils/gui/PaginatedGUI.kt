@@ -1,4 +1,4 @@
-package org.spacemc.utils.gui
+package org.spacemc.spaceutils.gui
 
 import com.github.stefvanschie.inventoryframework.adventuresupport.ComponentHolder
 import com.github.stefvanschie.inventoryframework.gui.type.ChestGui
@@ -6,11 +6,12 @@ import com.github.stefvanschie.inventoryframework.pane.PaginatedPane
 import com.github.stefvanschie.inventoryframework.pane.StaticPane
 import net.kyori.adventure.text.Component
 import org.bukkit.Material
-import org.spacemc.utils.item.ItemBuilder
+import org.spacemc.spaceutils.item.ItemBuilder
 
 /**
  * It's basically a class that creates paginated gui
  */
+@Suppress("unused")
 abstract class PaginatedGUI {
     abstract val backPaneMsg: Component
     abstract val backPaneMsgLore: Component
@@ -25,7 +26,10 @@ abstract class PaginatedGUI {
     abstract val backItemMaterial: Material
     abstract val closeItemMaterial: Material
 
+    @Suppress("MemberVisibilityCanBePrivate")
     lateinit var gui: ChestGui
+
+    @Suppress("MemberVisibilityCanBePrivate")
     var paginatedPane: PaginatedPane = PaginatedPane(0, 0, 9, 4)
 
 
@@ -77,7 +81,5 @@ abstract class PaginatedGUI {
         gui.addPane(backPane)
         gui.addPane(closePane)
         gui.addPane(forwardPane)
-
     }
-
 }

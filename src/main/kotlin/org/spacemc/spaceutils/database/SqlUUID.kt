@@ -1,4 +1,4 @@
-package org.spacemc.utils.database
+package org.spacemc.spaceutils.database
 
 import org.ktorm.schema.BaseTable
 import org.ktorm.schema.Column
@@ -20,6 +20,7 @@ object UuidSqlType : SqlType<UUID>(Types.OTHER, "uuid") {
     }
 }
 
+@Suppress("unused")
 fun BaseTable<*>.uuid(name: String): Column<UUID> {
     return registerColumn(name, UuidSqlType)
 }

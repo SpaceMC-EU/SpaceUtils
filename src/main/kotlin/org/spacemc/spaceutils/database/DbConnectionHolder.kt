@@ -1,4 +1,4 @@
-package org.spacemc.utils.database
+package org.spacemc.spaceutils.database
 
 import org.bukkit.configuration.ConfigurationSection
 import org.ktorm.database.Database
@@ -6,6 +6,7 @@ import org.ktorm.support.mysql.MySqlDialect
 
 object DBConnectionHolder {
 
+    @Suppress("MemberVisibilityCanBePrivate")
     lateinit var config: ConfigurationSection
 
     fun getDbConnection(): Database {

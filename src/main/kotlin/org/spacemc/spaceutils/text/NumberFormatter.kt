@@ -1,10 +1,11 @@
-package org.spacemc.utils.item
+package org.spacemc.spaceutils.text
 
 import java.text.DecimalFormat
 import kotlin.math.floor
 import kotlin.math.log10
 import kotlin.math.pow
 
+@Suppress("unused")
 object NumberFormatter {
     val decimalFormatter: DecimalFormat = DecimalFormat("#.###")
 
