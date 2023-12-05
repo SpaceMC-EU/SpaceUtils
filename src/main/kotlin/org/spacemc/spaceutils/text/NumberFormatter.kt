@@ -21,8 +21,8 @@ object NumberFormatter {
         }
     }
 
-    fun roundTextToDecimalPlaces(inputText: String, decimalPlaces: Int = 2): String {
-        val inputValue = inputText.toDouble()
+    fun roundToDecimalPlaces(number: Number, decimalPlaces: Int = 2): String {
+        val inputValue = number.toDouble()
         return "%.${decimalPlaces}f".format(inputValue)
     }
 }
